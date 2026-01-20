@@ -164,10 +164,9 @@
 
 .card-footer {
   padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .file-name {
@@ -179,6 +178,36 @@
 .file-status {
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.send {
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 20px rgba(48, 106, 255, 0.25);
+}
+
+.send:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(48, 106, 255, 0.35);
+}
+
+.send:disabled,
+.remove:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .remove {

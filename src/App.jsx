@@ -6,6 +6,7 @@ function App() {
   const [items, setItems] = useState([])
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState('')
+  const [processingIds, setProcessingIds] = useState(() => new Set())
   const inputRef = useRef(null)
   const itemsRef = useRef(items)
 
@@ -89,6 +90,39 @@ function App() {
     })
   }
 
+  const handleSendToServer = async (item) => {
+    if (processingIds.has(item.id)) {
+      return
+    }
+
+    setError('')
+    setProcessingIds((prev) => new Set([...prev, item.id]))
+
+    try {
+      const formData = new FormData()
+      formData.append('image', item.file)
+
+      const response = await fetch('/api/segment', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('server_error')
+      }
+
+      // TODO: 서버 응답 포맷 확정되면 결과 이미지 처리 추가
+    } catch (err) {
+      setError('서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(item.id)
+        return next
+      })
+    }
+  }
+
   return (
     <div className="page">
       <header className="hero">
@@ -160,15 +194,28 @@ function App() {
                 <div className="card-footer">
                   <div>
                     <p className="file-name">{item.file.name}</p>
-                    <p className="file-status">처리 대기</p>
+                    <p className="file-status">
+                      {processingIds.has(item.id) ? '전송 중' : '처리 대기'}
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    className="remove"
-                    onClick={() => handleRemove(item.id)}
-                  >
-                    삭제
-                  </button>
+                  <div className="card-actions">
+                    <button
+                      type="button"
+                      className="send"
+                      onClick={() => handleSendToServer(item)}
+                      disabled={processingIds.has(item.id)}
+                    >
+                      누끼 따기
+                    </button>
+                    <button
+                      type="button"
+                      className="remove"
+                      onClick={() => handleRemove(item.id)}
+                      disabled={processingIds.has(item.id)}
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}
